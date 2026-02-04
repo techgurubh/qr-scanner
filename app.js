@@ -1,3 +1,4 @@
+const secureNoteEl = document.getElementById("secureNote");
 const qrTypeEl = document.getElementById("qrType");
 const resultEl = document.getElementById("result");
 const flashBtn = document.getElementById("flashBtn");
@@ -46,8 +47,14 @@ function onScanSuccess(decodedText) {
 
   // Detect QR type
   const detectedType = detectQrType(decodedText);
-  qrTypeEl.textContent = "Detected Type: " + detectedType;
+qrTypeEl.textContent = "Detected Type: " + detectedType;
 
+// Show / hide encrypted badge
+if (detectedType.includes("Secure Govt ID")) {
+  secureNoteEl.classList.remove("hidden");
+} else {
+  secureNoteEl.classList.add("hidden");
+}
   // JSON formatter
   try {
     const parsed = JSON.parse(decodedText);
