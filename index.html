@@ -1,1 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Universal QR Scanner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <link rel="stylesheet" href="style.css" />
+  <script src="libs/html5-qrcode.min.js"></script>
+</head>
+<body>
+
+  <header>Universal QR Scanner</header>
+
+  <div id="scanner-container">
+    <div id="reader"></div>
+
+    <button id="flashBtn" class="hidden" title="Toggle Flash">🔦</button>
+  </div>
+
+  <div class="controls">
+    <label class="upload-btn">
+      📂 Upload QR Image
+      <input type="file" id="fileInput" accept="image/*" hidden>
+    </label>
+
+    <div id="dropZone">Drag & Drop QR Image Here</div>
+  </div>
+
+  <div id="resultBox">
+    <h3>Latest Scan Result</h3>
+    <pre id="result">No scan yet</pre>
+    <button id="copyBtn">📋 Copy</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
