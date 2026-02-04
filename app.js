@@ -7,6 +7,9 @@ const dropZone = document.getElementById("dropZone");
 let html5QrCode;
 let torchOn = false;
 
+/* ======================
+   SUCCESS HANDLER
+====================== */
 function onScanSuccess(decodedText) {
   resultEl.textContent = decodedText;
 
@@ -15,31 +18,41 @@ function onScanSuccess(decodedText) {
     navigator.vibrate(200);
   }
 
-  html5QrCode.stop();
+  if (html5QrCode) {
+    html5QrCode.stop().catch(() => {});
+  }
 }
 
+/* ======================
+   CAMERA SCANNER
+====================== */
 function startScanner() {
   html5QrCode = new Html5Qrcode("reader");
 
   Html5Qrcode.getCameras().then(cameras => {
-    const backCam = cameras.find(c => c.label.toLowerCase().includes("back")) || cameras[0];
+    const backCam =
+      cameras.find(c => c.label.toLowerCase().includes("back")) || cameras[0];
 
-    html5QrCode.start(
-      backCam.id,
-      {
-        fps: 10,
-        qrbox: { width: 250, height: 250 }
-      },
-      onScanSuccess
-    ).then(() => {
-      html5QrCode.getRunningTrackCapabilities().then(cap => {
-        if (cap.torch) flashBtn.classList.remove("hidden");
+    html5QrCode
+      .start(
+        backCam.id,
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 }
+        },
+        onScanSuccess
+      )
+      .then(() => {
+        html5QrCode.getRunningTrackCapabilities().then(cap => {
+          if (cap.torch) flashBtn.classList.remove("hidden");
+        });
       });
-    });
   });
 }
 
-// Flash toggle
+/* ======================
+   FLASH / TORCH
+====================== */
 flashBtn.onclick = () => {
   torchOn = !torchOn;
   html5QrCode.applyVideoConstraints({
@@ -47,23 +60,68 @@ flashBtn.onclick = () => {
   });
 };
 
-// Copy result
+/* ======================
+   COPY RESULT
+====================== */
 copyBtn.onclick = () => {
+  if (!resultEl.textContent) return;
   navigator.clipboard.writeText(resultEl.textContent);
   alert("Copied");
 };
 
-// Upload image scan
+/* ======================
+   IMAGE FILE SCAN (jsQR)
+====================== */
+function scanImageFile(file) {
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+
+      const imageData = ctx.getImageData(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      const code = jsQR(
+        imageData.data,
+        imageData.width,
+        imageData.height,
+        { inversionAttempts: "attemptBoth" }
+      );
+
+      if (code) {
+        onScanSuccess(code.data);
+      } else {
+        alert("No QR detected in image");
+      }
+    };
+    img.src = reader.result;
+  };
+
+  reader.readAsDataURL(file);
+}
+
+/* ======================
+   FILE UPLOAD
+====================== */
 fileInput.onchange = e => {
   const file = e.target.files[0];
-  if (!file) return;
-
-  Html5Qrcode.scanFile(file, true)
-    .then(onScanSuccess)
-    .catch(err => alert("QR not detected"));
+  if (file) scanImageFile(file);
 };
 
-// Drag & Drop
+/* ======================
+   DRAG & DROP
+====================== */
 dropZone.ondragover = e => {
   e.preventDefault();
   dropZone.classList.add("dragover");
@@ -78,11 +136,10 @@ dropZone.ondrop = e => {
   dropZone.classList.remove("dragover");
 
   const file = e.dataTransfer.files[0];
-  if (!file) return;
-
-  Html5Qrcode.scanFile(file, true)
-    .then(onScanSuccess)
-    .catch(err => alert("QR not detected"));
+  if (file) scanImageFile(file);
 };
 
+/* ======================
+   START CAMERA
+====================== */
 startScanner();
