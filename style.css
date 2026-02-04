@@ -93,3 +93,18 @@ pre {
   border-radius: 6px;
   color: white;
 }
+
+.secure-note {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255, 165, 0, 0.15);
+  border-left: 4px solid orange;
+  color: #ffd699;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.hidden {
+  display: none;
+}
