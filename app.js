@@ -11,13 +11,24 @@ let torchOn = false;
    SUCCESS HANDLER
 ====================== */
 function onScanSuccess(decodedText) {
-  resultEl.textContent = decodedText;
+  let output = decodedText;
+
+  // Try JSON formatting
+  try {
+    const parsed = JSON.parse(decodedText);
+    output = JSON.stringify(parsed, null, 2);
+  } catch (e) {
+    // Not JSON, keep original text
+  }
+
+  resultEl.textContent = output;
 
   // Vibrate on success
   if (navigator.vibrate) {
     navigator.vibrate(200);
   }
 
+  // Stop camera after scan
   if (html5QrCode) {
     html5QrCode.stop().catch(() => {});
   }
