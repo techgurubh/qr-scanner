@@ -1,1 +1,95 @@
 
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #0f172a;
+  color: #fff;
+}
+
+header {
+  text-align: center;
+  padding: 12px;
+  font-size: 18px;
+  background: #020617;
+}
+
+#scanner-container {
+  position: relative;
+  max-width: 420px;
+  margin: 15px auto;
+}
+
+#reader {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+#flashBtn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  font-size: 22px;
+  background: #111827;
+  border: none;
+  color: white;
+  padding: 10px;
+  border-radius: 50%;
+}
+
+.hidden {
+  display: none;
+}
+
+.controls {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+}
+
+.upload-btn {
+  display: block;
+  background: #2563eb;
+  padding: 12px;
+  text-align: center;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+#dropZone {
+  border: 2px dashed #64748b;
+  padding: 20px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+#dropZone.dragover {
+  background: #1e293b;
+}
+
+#resultBox {
+  max-width: 420px;
+  margin: 15px auto;
+  background: #020617;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+#copyBtn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  background: #16a34a;
+  border: none;
+  border-radius: 6px;
+  color: white;
+}
