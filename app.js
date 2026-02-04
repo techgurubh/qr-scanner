@@ -10,29 +10,33 @@ let html5QrCode;
 let torchOn = false;
 
 /* ======================
-   HELPER FUNCTION 
+   HELPER FUNCTION
 ====================== */
 function detectQrType(rawText) {
-  // Try JSON-based detection
+  // 1️⃣ JSON-based detection (PAN / Old Voter)
   try {
     const obj = JSON.parse(rawText);
 
     if (obj.pan || obj.PAN) return "PAN Card QR";
-    if (obj.epic || obj.EPIC || obj.epic_no) return "Voter ID QR";
+    if (obj.epic || obj.EPIC || obj.epic_no || obj.EPICNO)
+      return "Voter ID QR";
 
     return "JSON QR";
   } catch (e) {
     // Not JSON
   }
 
-  // Aadhaar Secure QR (encrypted, long base64)
-  const aadhaarPattern = /^[A-Za-z0-9+/=]{100,}$/;
-  if (aadhaarPattern.test(rawText)) {
-    return "Aadhaar Secure QR (Encrypted)";
+  // 2️⃣ Secure Govt ID QR (Aadhaar / EPIC Secure)
+  const base64Pattern = /^[A-Za-z0-9+/=]{60,}$/;
+  if (base64Pattern.test(rawText.trim())) {
+    return "Secure Govt ID QR (Encrypted)";
   }
 
-  // URL QR
-  if (rawText.startsWith("http://") || rawText.startsWith("https://")) {
+  // 3️⃣ URL QR
+  if (
+    rawText.startsWith("http://") ||
+    rawText.startsWith("https://")
+  ) {
     return "URL QR";
   }
 
@@ -47,14 +51,15 @@ function onScanSuccess(decodedText) {
 
   // Detect QR type
   const detectedType = detectQrType(decodedText);
-qrTypeEl.textContent = "Detected Type: " + detectedType;
+  qrTypeEl.textContent = "Detected Type: " + detectedType;
 
-// Show / hide encrypted badge
-if (detectedType.includes("Secure Govt ID")) {
-  secureNoteEl.classList.remove("hidden");
-} else {
-  secureNoteEl.classList.add("hidden");
-}
+  // Show / hide encrypted badge
+  if (detectedType.includes("Secure Govt ID")) {
+    secureNoteEl.classList.remove("hidden");
+  } else {
+    secureNoteEl.classList.add("hidden");
+  }
+
   // JSON formatter
   try {
     const parsed = JSON.parse(decodedText);
@@ -65,12 +70,12 @@ if (detectedType.includes("Secure Govt ID")) {
 
   resultEl.textContent = output;
 
-  // Vibrate
+  // Vibrate on success
   if (navigator.vibrate) {
     navigator.vibrate(200);
   }
 
-  // Stop camera
+  // Stop camera after scan
   if (html5QrCode) {
     html5QrCode.stop().catch(() => {});
   }
@@ -84,7 +89,8 @@ function startScanner() {
 
   Html5Qrcode.getCameras().then(cameras => {
     const backCam =
-      cameras.find(c => c.label.toLowerCase().includes("back")) || cameras[0];
+      cameras.find(c => c.label.toLowerCase().includes("back")) ||
+      cameras[0];
 
     html5QrCode
       .start(
