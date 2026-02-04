@@ -1,3 +1,4 @@
+const qrTypeEl = document.getElementById("qrType");
 const resultEl = document.getElementById("result");
 const flashBtn = document.getElementById("flashBtn");
 const copyBtn = document.getElementById("copyBtn");
@@ -8,27 +9,61 @@ let html5QrCode;
 let torchOn = false;
 
 /* ======================
+   HELPER FUNCTION 
+====================== */
+function detectQrType(rawText) {
+  // Try JSON-based detection
+  try {
+    const obj = JSON.parse(rawText);
+
+    if (obj.pan || obj.PAN) return "PAN Card QR";
+    if (obj.epic || obj.EPIC || obj.epic_no) return "Voter ID QR";
+
+    return "JSON QR";
+  } catch (e) {
+    // Not JSON
+  }
+
+  // Aadhaar Secure QR (encrypted, long base64)
+  const aadhaarPattern = /^[A-Za-z0-9+/=]{100,}$/;
+  if (aadhaarPattern.test(rawText)) {
+    return "Aadhaar Secure QR (Encrypted)";
+  }
+
+  // URL QR
+  if (rawText.startsWith("http://") || rawText.startsWith("https://")) {
+    return "URL QR";
+  }
+
+  return "Generic QR";
+}
+
+/* ======================
    SUCCESS HANDLER
 ====================== */
 function onScanSuccess(decodedText) {
   let output = decodedText;
 
-  // Try JSON formatting
+  // Detect QR type
+  const detectedType = detectQrType(decodedText);
+  qrTypeEl.textContent = "Detected Type: " + detectedType;
+
+  // JSON formatter
   try {
     const parsed = JSON.parse(decodedText);
     output = JSON.stringify(parsed, null, 2);
   } catch (e) {
-    // Not JSON, keep original text
+    // Not JSON
   }
 
   resultEl.textContent = output;
 
-  // Vibrate on success
+  // Vibrate
   if (navigator.vibrate) {
     navigator.vibrate(200);
   }
 
-  // Stop camera after scan
+  // Stop camera
   if (html5QrCode) {
     html5QrCode.stop().catch(() => {});
   }
